@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "agents:install": "tsx scripts/install-agents.ts"
   },
   "dependencies": {
     "@fastify/middie": "^9.3.6",
