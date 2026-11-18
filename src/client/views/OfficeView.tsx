@@ -31,7 +31,7 @@ export function OfficeView({ projectKey, pickedSessionId }: { projectKey: string
               ? "There's no project at this address. It may have no sessions left."
               : "Loading the office…"}
           </p>
-          <button type="button" onClick={() => navigate({ kind: "building" })}>
+          <button type="button" className={layout.plainButton} onClick={() => navigate({ kind: "building" })}>
             Back to the building
           </button>
         </section>

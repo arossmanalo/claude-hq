@@ -47,6 +47,20 @@
   font-size: var(--text-sm);
 }
 
+.plainButton {
+  margin-top: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--n-700);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.plainButton:hover {
+  border-color: var(--n-500);
+}
+
 @media (max-width: 899px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
