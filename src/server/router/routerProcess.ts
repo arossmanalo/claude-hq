@@ -2,6 +2,7 @@ import { EventEmitter } from "node:events";
 import { randomUUID } from "node:crypto";
 import type { Readable, Writable } from "node:stream";
 import type { PermissionRequest, RouterModel, RouterPhase, RouterStatus } from "../../shared/protocol";
+import { maskSecrets } from "../../shared/maskSecrets";
 import { cliInput, parseCliLine, type CliMessage } from "./cliStream";
 import { summariseToolInput, type Decision } from "./permissionPolicy";
 
@@ -190,7 +191,7 @@ export class RouterProcess extends EventEmitter<RouterEvents> {
       sessionId: this.sessionId,
       phase: this.phase,
       model: this.model,
-      queued: [...this.queue],
+      queued: this.queue.map(maskSecrets),
       handoffsThisRequest: this.handoffs,
       handoffCap: this.options.handoffCap,
       attention: this.attention,
@@ -367,7 +368,9 @@ export class RouterProcess extends EventEmitter<RouterEvents> {
     } else if (spawnError || code !== 0) {
       this.phase = "error";
       const detail = spawnError ?? this.stderrTail.trim().split("\n").slice(-3).join(" ");
-      this.error = `The router process ended unexpectedly${code !== null ? ` (exit code ${code})` : ""}. ${detail}`.trim();
+      this.error = maskSecrets(
+        `The router process ended unexpectedly${code !== null ? ` (exit code ${code})` : ""}. ${detail}`.trim(),
+      );
     } else {
       this.phase = "stopped";
     }

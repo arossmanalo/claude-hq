@@ -121,4 +121,10 @@ describe("summariseToolInput", () => {
       "Bash: npm install left-pad",
     );
   });
+
+  it("masks secrets on the approval card", () => {
+    expect(summariseToolInput("Bash", { command: "API_TOKEN=abcd1234 npm run deploy" })).toBe(
+      "Bash: API_TOKEN=•••••• npm run deploy",
+    );
+  });
 });

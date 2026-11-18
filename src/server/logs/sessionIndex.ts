@@ -1,5 +1,6 @@
 import { open, readdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { maskSecrets } from "../../shared/maskSecrets";
 import {
   baseLineSchema,
   lastPromptLineSchema,
@@ -103,10 +104,15 @@ function readSummaryFields(headLines: string[], tailLines: string[]) {
   const promptTitle: string | null = lastPrompt;
   return {
     cwd: relocatedCwd ?? cwd,
-    title: customTitle ?? aiTitle ?? (promptTitle ? truncate(promptTitle) : null),
+    title: maskTitle(customTitle ?? aiTitle ?? (promptTitle ? truncate(promptTitle) : null)),
     startedAt,
     updatedAt,
   };
+}
+
+/** Titles often come from the user's last prompt, which can contain a pasted key. */
+function maskTitle(title: string | null): string | null {
+  return title === null ? null : maskSecrets(title);
 }
 
 function truncate(text: string): string {

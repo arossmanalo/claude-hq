@@ -195,10 +195,10 @@ export class SessionAccumulator {
         if (!parsed.success) return;
         // A title the user set wins over one Claude generated.
         if (parsed.data.type === "custom-title") {
-          this.title = parsed.data.customTitle;
+          this.title = maskSecrets(parsed.data.customTitle);
           this.hasCustomTitle = true;
         } else if (!this.hasCustomTitle) {
-          this.title = parsed.data.aiTitle;
+          this.title = maskSecrets(parsed.data.aiTitle);
         }
         return;
       }
@@ -293,7 +293,7 @@ export class SessionAccumulator {
 
   private recordHandoff(toolUseId: string, input: Record<string, unknown>, at?: string): void {
     const role = typeof input.subagent_type === "string" ? input.subagent_type : "general-purpose";
-    const description = typeof input.description === "string" ? input.description : "";
+    const description = typeof input.description === "string" ? maskSecrets(input.description) : "";
     this.handoffs.set(toolUseId, {
       toolUseId,
       role,
@@ -340,7 +340,7 @@ export class SessionAccumulator {
         lastErrored: acc.lastErrored,
       }),
       currentTool: currentTool ?? null,
-      task: isRouter ? null : (meta?.description ?? handoff?.description ?? null),
+      task: isRouter ? null : maskOrNull(meta?.description ?? handoff?.description ?? null),
       lastActivityAt: acc.lastActivityAt,
       tokens: acc.tokens,
     };
@@ -368,6 +368,10 @@ export function deriveAgentState(input: AgentStateInput): AgentState {
   if (input.lastKind === "text" && !input.isRouter) return "thinking";
   if (input.lastKind === "text") return input.liveStatus === "busy" ? "thinking" : "idle";
   return "thinking";
+}
+
+function maskOrNull(text: string | null): string | null {
+  return text === null ? null : maskSecrets(text);
 }
 
 function toolResultText(content: unknown): string {

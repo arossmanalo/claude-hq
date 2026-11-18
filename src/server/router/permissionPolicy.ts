@@ -1,4 +1,5 @@
 import path from "node:path";
+import { maskSecrets } from "../../shared/maskSecrets";
 
 export type Decision =
   | { kind: "allow" }
@@ -156,5 +157,6 @@ export function summariseToolInput(toolName: string, input: Record<string, unkno
     pick("description") ??
     JSON.stringify(input);
   const oneLine = text.replace(/\s+/g, " ").trim();
-  return `${toolName}: ${oneLine.length > 300 ? `${oneLine.slice(0, 299)}…` : oneLine}`;
+  const masked = maskSecrets(oneLine);
+  return `${toolName}: ${masked.length > 300 ? `${masked.slice(0, 299)}…` : masked}`;
 }
