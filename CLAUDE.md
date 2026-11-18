@@ -26,6 +26,43 @@ with from the browser; the router hands work to specialist subagents.
   (a log line, a WebSocket message, a CLI stream event) is parsed with zod there.
 - `tests`: Vitest unit tests. `e2e`: Playwright tests.
 
+## Claude Code formats this app depends on (verified against CLI 2.1.316)
+
+Headless router process:
+- Command: `claude.exe -p --input-format stream-json --output-format stream-json --verbose
+  --permission-prompts host --permission-prompt-tool stdio`.
+  - Without `--permission-prompt-tool stdio`, every prompt is silently denied
+    (`system:permission_denied`), and no request ever reaches the host.
+- Spawn the real `claude.exe`, never the npm `claude.cmd` shim. With `shell: true` the `--agents`
+  JSON gets mangled.
+- Paths that contain 8.3 short names (`ARYLRO~1`) are denied by a safety check without a prompt.
+  Always pass long-form paths as `cwd`.
+- Stdin messages:
+  - Handshake: `{"type":"control_request","request_id":…,"request":{"subtype":"initialize"}}`.
+  - User turn: `{"type":"user","message":{"role":"user","content":"…"}}`.
+- Permission request (stdout):
+  `{"type":"control_request","request_id","request":{"subtype":"can_use_tool","tool_name","input",`
+  `"tool_use_id","agent_id"?}}`.
+  - `agent_id` is present only when a subagent is asking.
+  - Answer with `{"type":"control_response","response":{"subtype":"success","request_id",`
+    `"response":{"behavior":"allow","updatedInput":…}|{"behavior":"deny","message":…}}}`.
+- Other stdout events used:
+  - `system:init` (`session_id`).
+  - `system:task_started` (`tool_use_id`, `subagent_type`). Subagent messages carry `agent_id`.
+  - `system:task_updated` and `system:task_notification`.
+  - `assistant` and `user`.
+  - `result`, which ends a turn and carries `usage` and `total_cost_usd`.
+
+Session logs on disk (`~/.claude/projects/<slug>/`):
+- `<sessionId>.jsonl` holds the main thread. Lines have many `type`s; only `user` and `assistant`
+  matter for state.
+- Assistant content blocks are written as separate lines that share the same `message.id` and
+  repeat the same `usage`. Count tokens once per `message.id`.
+- Subagent logs are `<sessionId>/subagents/agent-<agentId>.jsonl` (`isSidechain: true`).
+  `agent-<agentId>.meta.json` holds `agentType` (the role) and `toolUseId` (the router's Agent call).
+- `~/.claude/sessions/<pid>.json` lists running processes: `sessionId`, `cwd`, `status`
+  (`busy`/`idle`), `name`, `updatedAt`. A session is live only while that pid exists.
+
 ## Rules for this repo
 
 - The server binds to 127.0.0.1 only and makes no outbound network calls.
