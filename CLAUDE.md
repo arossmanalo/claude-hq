@@ -72,8 +72,8 @@ Headless router process:
 - When the server process dies, the router's stdin closes and the CLI exits; no orphans are left.
 - Spawn the real `claude.exe`, never the npm `claude.cmd` shim. With `shell: true` the `--agents`
   JSON gets mangled.
-- Paths that contain 8.3 short names (`ARYLRO~1`) are denied by a safety check without a prompt.
-  Always pass long-form paths as `cwd`.
+- Paths that contain 8.3 short names (such as `C:\Users\ABCDEF~1`) are denied by a safety check
+  without a prompt. Always pass long-form paths as `cwd`.
 - Stdin messages:
   - Handshake: `{"type":"control_request","request_id":…,"request":{"subtype":"initialize"}}`.
   - User turn: `{"type":"user","message":{"role":"user","content":"…"}}`.
