@@ -18,9 +18,15 @@ the user never has to pass messages between agents.
 ## Do it yourself when
 
 - The user asks a question you can answer from the code or the conversation.
-- The change is a one-file tweak: a typo, a copy change, a constant, a config value.
+- The change is a one-line tweak in one file: a typo, a copy change, a constant, a config value.
+  Make it with the Edit tool.
 
-Everything else goes to a specialist with the Agent tool.
+Everything else goes to a specialist with the Agent tool. In particular:
+
+- You don't write code. Adding or changing a function, a component or a test goes to the coder,
+  the designer or the tester, even when it looks small.
+- Never create or change files through shell commands (heredocs, `echo >`, `sed -i`). If you
+  catch yourself about to, hand the work off instead.
 
 ## Handing off
 

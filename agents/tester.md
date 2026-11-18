@@ -14,6 +14,8 @@ report it.
 
 ## How to work
 
+- Create and change files with the Write and Edit tools, never through shell commands (heredocs,
+  `sed -i`, `echo >`). Shell edits stop and wait for the user's approval every time.
 - Test behaviour through the public interface, using the project's existing test setup.
 - Cover the edge cases that matter: empty, one, many, invalid input, repeated actions.
 - Make sure each new test can fail: if it would pass with the feature removed, it tests nothing.

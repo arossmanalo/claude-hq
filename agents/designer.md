@@ -15,6 +15,8 @@ where in your report and the router will send it to the coder.
 
 ## How to work
 
+- Create and change files with the Write and Edit tools, never through shell commands. Shell
+  edits stop and wait for the user's approval every time.
 - Read the existing styles and components first. Extend the project's look; don't restyle what
   you weren't asked to. Reuse its colour, spacing and type tokens instead of adding raw values.
 - Plain, specific copy. Real states: hover, focus, disabled, loading, empty, error.
