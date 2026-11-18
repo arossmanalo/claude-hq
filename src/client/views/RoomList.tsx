@@ -36,7 +36,7 @@ export function RoomList({ rooms, selectedRole, onSelect, onOpenArchive, archive
                   {[
                     modelLabel(room.model),
                     room.agentCount > 0 ? `${compactNumber(workTokens(room.tokens))} tokens` : null,
-                    room.commits > 0 ? `${room.commits} commits` : null,
+                    room.commits === 1 ? "1 commit" : room.commits > 1 ? `${room.commits} commits` : null,
                   ]
                     .filter(Boolean)
                     .join(" · ") || "No work in this session"}
