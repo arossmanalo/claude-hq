@@ -141,6 +141,19 @@ export class RouterProcess extends EventEmitter<RouterEvents> {
     this.child?.kill();
   }
 
+  /** Kills the process and resolves once it has exited (or after `timeoutMs`). */
+  killAndWait(timeoutMs = 5000): Promise<void> {
+    if (!this.child) return Promise.resolve();
+    return new Promise((resolve) => {
+      const timer = setTimeout(resolve, timeoutMs);
+      this.once("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      this.kill();
+    });
+  }
+
   get isBusy(): boolean {
     return this.busy;
   }

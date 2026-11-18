@@ -30,7 +30,13 @@ export interface RouterManagerOptions {
   /** Where router state is kept so an interrupted task can be resumed after a restart. */
   statePath: string;
   sessionInfo: (sessionId: string) => SessionInfo | null;
-  routerAgentExists: (cwd: string) => Promise<boolean>;
+  /** The router agent definition for this folder, or null when it isn't installed. */
+  routerAgent: (cwd: string) => Promise<RouterAgent | null>;
+}
+
+export interface RouterAgent {
+  /** The `model:` from the agent file, when it names one the picker knows. */
+  model: RouterModel | null;
 }
 
 export interface SendRequest {
@@ -145,13 +151,15 @@ export class RouterManager extends EventEmitter<ManagerEvents> {
         );
       }
       const resumeId = request.sessionId ?? existing.sessionId;
-      existing.kill();
+      // The office is replacing its own router: wait for it to exit so two processes never write
+      // the same session, and skip the "running elsewhere" check, which would see that process.
       this.routers.delete(key);
-      await this.startRouter(cwd, { ...request, sessionId: resumeId });
+      await existing.killAndWait();
+      await this.startRouter(cwd, { ...request, sessionId: resumeId }, { replacingOwnRouter: true });
       return;
     }
 
-    await this.startRouter(cwd, request);
+    await this.startRouter(cwd, request, { replacingOwnRouter: false });
   }
 
   stop(cwd: string): void {
@@ -195,8 +203,12 @@ export class RouterManager extends EventEmitter<ManagerEvents> {
     throw new Error(`The folder ${cwd} doesn't exist or isn't a folder.`);
   }
 
-  private async startRouter(cwd: string, request: SendRequest): Promise<void> {
-    if (request.sessionId) {
+  private async startRouter(
+    cwd: string,
+    request: SendRequest,
+    { replacingOwnRouter }: { replacingOwnRouter: boolean },
+  ): Promise<void> {
+    if (request.sessionId && !replacingOwnRouter) {
       const info = this.options.sessionInfo(request.sessionId);
       if (info?.live && !info.ownedByOffice) {
         throw new Error(
@@ -204,7 +216,8 @@ export class RouterManager extends EventEmitter<ManagerEvents> {
         );
       }
     }
-    if (!(await this.options.routerAgentExists(cwd))) {
+    const agent = await this.options.routerAgent(cwd);
+    if (!agent) {
       throw new Error(
         "The router agent isn't installed. Run `npm run agents:install` in the Claude Office folder, then send again.",
       );
@@ -214,7 +227,8 @@ export class RouterManager extends EventEmitter<ManagerEvents> {
     const router = new RouterProcess({
       cwd,
       resumeSessionId: request.sessionId,
-      model: request.model,
+      // Pass the agent file's model explicitly: the user's global "model" setting would win otherwise.
+      model: request.model ?? agent.model,
       handoffCap: this.options.settings.value.handoffCap,
       spawn: this.options.spawn,
       decide: ({ role, toolName, input }) =>

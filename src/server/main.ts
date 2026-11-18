@@ -1,5 +1,4 @@
 import { spawn } from "node:child_process";
-import { access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { builtClientDir, createApp } from "./app";
@@ -8,6 +7,7 @@ import { LogStore } from "./logs/logStore";
 import { openBrowser } from "./openBrowser";
 import { claudeHome, liveSessionsDir, officeHome, projectsDir } from "./paths";
 import { findFreePort, HOST } from "./port";
+import { findRouterAgent } from "./router/agentFile";
 import { findClaudeExecutable } from "./router/claudeBinary";
 import { RouterManager } from "./router/routerManager";
 import type { ChildLike } from "./router/routerProcess";
@@ -16,23 +16,6 @@ import { SettingsFile } from "./settings";
 const DEFAULT_PORT = 4317;
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const isDev = process.argv.includes("--dev");
-
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** The router agent can live in the user's agents folder or be overridden by the project. */
-async function routerAgentExists(cwd: string): Promise<boolean> {
-  return (
-    (await fileExists(path.join(cwd, ".claude", "agents", "router.md"))) ||
-    (await fileExists(path.join(claudeHome(), "agents", "router.md")))
-  );
-}
 
 async function main(): Promise<void> {
   const port = await findFreePort(Number(process.env.OFFICE_PORT ?? DEFAULT_PORT));
@@ -58,7 +41,7 @@ async function main(): Promise<void> {
       return spawn(claudeBin, args, { cwd, stdio: "pipe", windowsHide: true });
     },
     sessionInfo: (sessionId) => store.sessionSummary(sessionId),
-    routerAgentExists,
+    routerAgent: (cwd) => findRouterAgent(cwd, claudeHome()),
   });
   manager = routers;
   await routers.load();

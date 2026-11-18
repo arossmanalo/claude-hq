@@ -42,7 +42,7 @@ describe("RouterManager", () => {
         return child;
       },
       sessionInfo: (id) => sessions.get(id) ?? null,
-      routerAgentExists: async () => agentInstalled,
+      routerAgent: async () => (agentInstalled ? { model: "opus" } : null),
     });
   });
 
@@ -81,9 +81,15 @@ describe("RouterManager", () => {
     await expect(send({ cwd: path.join(dir, "nope") })).rejects.toThrow(/doesn't exist/);
   });
 
+  it("passes the agent file's model so the user's global model setting can't override it", async () => {
+    await send();
+    expect(children[0]?.args).toEqual(expect.arrayContaining(["--model", "opus"]));
+    expect(manager.statuses()[0]?.model).toBe("opus");
+  });
+
   it("won't switch sessions or models while the router is mid-request", async () => {
     await send();
-    await expect(send({ model: "opus" })).rejects.toThrow(/middle of a request/);
+    await expect(send({ model: "haiku" })).rejects.toThrow(/middle of a request/);
   });
 
   it("restarts with the new model once the router is idle, keeping the session", async () => {
@@ -92,9 +98,11 @@ describe("RouterManager", () => {
     first?.stdout.write(`${JSON.stringify({ type: "system", subtype: "init", session_id: "s1" })}\n`);
     first?.stdout.write(`${JSON.stringify({ type: "result", subtype: "success" })}\n`);
     await new Promise((resolve) => setImmediate(resolve));
-    await send({ model: "opus" });
+    // Claude Code's registry still lists the old process for a moment; that's the office's own.
+    sessions.set("s1", { live: true, ownedByOffice: false });
+    await send({ model: "haiku" });
     expect(children).toHaveLength(2);
-    expect(children[1]?.args).toEqual(expect.arrayContaining(["--model", "opus", "--resume", "s1"]));
+    expect(children[1]?.args).toEqual(expect.arrayContaining(["--model", "haiku", "--resume", "s1"]));
   });
 
   it("remembers a busy router as interrupted across a restart", async () => {
@@ -108,7 +116,7 @@ describe("RouterManager", () => {
       statePath: path.join(dir, "routers.json"),
       spawn: () => new FakeChild([]),
       sessionInfo: () => null,
-      routerAgentExists: async () => true,
+      routerAgent: async () => ({ model: "opus" }),
     });
     await next.load();
     expect(next.statuses()[0]).toMatchObject({ phase: "interrupted" });
