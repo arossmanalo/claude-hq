@@ -32,7 +32,18 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
     requestId: z.string().min(1).max(200),
     allow: z.boolean(),
   }),
+  z.object({
+    type: z.literal("settings.sound"),
+    muted: z.boolean(),
+    volume: z.number().min(0).max(1),
+  }),
 ]);
+
+export interface SoundSettings {
+  muted: boolean;
+  /** 0 to 1. */
+  volume: number;
+}
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 
@@ -87,6 +98,7 @@ const SERVER_MESSAGE_TYPES = new Set([
   "permissions",
   "taskDone",
   "notice",
+  "settings",
 ]);
 
 /**
@@ -110,4 +122,5 @@ export type ServerMessage =
   | { type: "permissions"; requests: PermissionRequest[] }
   /** A router turn finished with nothing left pending; the client plays the "done" sound. */
   | { type: "taskDone"; cwd: string }
+  | { type: "settings"; sound: SoundSettings }
   | { type: "notice"; level: "info" | "error"; message: string };

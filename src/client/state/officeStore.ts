@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import type { ProjectSummary, SessionDetail } from "../../shared/model";
-import type { PermissionRequest, RouterStatus, ServerMessage } from "../../shared/protocol";
+import type {
+  PermissionRequest,
+  RouterStatus,
+  ServerMessage,
+  SoundSettings,
+} from "../../shared/protocol";
 
 export type ConnectionState = "connecting" | "open" | "closed";
 
@@ -27,6 +32,10 @@ interface OfficeState {
   view: View;
   /** Bumped on each finished task, so the sound hook can react to repeats. */
   taskDoneCount: number;
+  sound: SoundSettings;
+  /** The browser allows audio only after the first click or key press on the page. */
+  soundUnlocked: boolean;
+  setSoundUnlocked: () => void;
   setConnection: (state: ConnectionState) => void;
   receive: (message: ServerMessage) => void;
   setView: (view: View) => void;
@@ -45,6 +54,9 @@ export const useOfficeStore = create<OfficeState>()((set) => ({
   notices: [],
   view: { kind: "building" },
   taskDoneCount: 0,
+  sound: { muted: false, volume: 0.6 },
+  soundUnlocked: false,
+  setSoundUnlocked: () => set({ soundUnlocked: true }),
   setConnection: (connection) => set({ connection }),
   receive: (message) => {
     switch (message.type) {
@@ -64,6 +76,9 @@ export const useOfficeStore = create<OfficeState>()((set) => ({
         return;
       case "taskDone":
         set((state) => ({ taskDoneCount: state.taskDoneCount + 1 }));
+        return;
+      case "settings":
+        set({ sound: message.sound });
         return;
       case "notice":
         set((state) => ({

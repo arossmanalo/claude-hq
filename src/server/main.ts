@@ -3,7 +3,7 @@ import { access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { builtClientDir, createApp } from "./app";
-import type { HubHandlers } from "./clientHub";
+import type { ClientHub, HubHandlers } from "./clientHub";
 import { LogStore } from "./logs/logStore";
 import { openBrowser } from "./openBrowser";
 import { claudeHome, liveSessionsDir, officeHome, projectsDir } from "./paths";
@@ -69,6 +69,7 @@ async function main(): Promise<void> {
       send({ type: "projects", projects: store.projects() });
       send({ type: "routers", routers: routers.statuses() });
       send({ type: "permissions", requests: routers.permissions() });
+      send({ type: "settings", sound: settings.value.sound });
       if (settingsProblem) send({ type: "notice", level: "error", message: settingsProblem });
     },
     onSubscribe: async (sessionIds, send) => {
@@ -96,10 +97,19 @@ async function main(): Promise<void> {
         case "permission.answer":
           routers.answer(message.requestId, message.allow);
           return;
+        case "settings.sound": {
+          const next = await settings.update((current) => ({
+            ...current,
+            sound: { muted: message.muted, volume: message.volume },
+          }));
+          hubRef?.broadcast({ type: "settings", sound: next.sound });
+          return;
+        }
       }
     },
   });
 
+  let hubRef: ClientHub | null = null;
   const { app, hub } = await createApp({
     port,
     store,
@@ -108,6 +118,7 @@ async function main(): Promise<void> {
     logLevel: process.env.OFFICE_LOG_LEVEL,
   });
 
+  hubRef = hub;
   routers.on("changed", () => hub.broadcast({ type: "routers", routers: routers.statuses() }));
   routers.on("permissions", () =>
     hub.broadcast({ type: "permissions", requests: routers.permissions() }),

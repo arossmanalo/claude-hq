@@ -1,5 +1,6 @@
 import { useOfficeStore } from "../state/officeStore";
 import { navigate } from "../state/useHashRoute";
+import { SoundControls } from "./SoundControls";
 import styles from "./TopBar.module.css";
 
 const CONNECTION_TEXT = {
@@ -43,6 +44,7 @@ export function TopBar() {
         )}
       </nav>
       <div className={styles.status}>
+        <SoundControls />
         {permissions.length > 0 && (
           <span className={styles.attention}>
             {permissions.length === 1 ? "1 approval waiting" : `${permissions.length} approvals waiting`}

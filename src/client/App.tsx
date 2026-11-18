@@ -3,6 +3,7 @@ import { Notices } from "./components/Notices";
 import { TopBar } from "./components/TopBar";
 import { connection } from "./state/connection";
 import { useOfficeStore } from "./state/officeStore";
+import { useAttentionSignals } from "./state/useAttentionSignals";
 import { useHashRoute } from "./state/useHashRoute";
 import { BuildingView } from "./views/BuildingView";
 import { NewOfficeView, OfficeView } from "./views/OfficeView";
@@ -10,6 +11,7 @@ import styles from "./App.module.css";
 
 export function App() {
   useHashRoute();
+  useAttentionSignals();
   useEffect(() => connection.start(), []);
   const view = useOfficeStore((state) => state.view);
 
