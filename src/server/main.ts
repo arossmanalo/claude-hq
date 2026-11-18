@@ -129,13 +129,25 @@ async function main(): Promise<void> {
   if (isDev) {
     const { createServer } = await import("vite");
     const middie = (await import("@fastify/middie")).default;
+    // Hot reload gets its own port: sharing the HTTP server, Vite's socket and the office's
+    // /ws socket both answer every upgrade and corrupt each other's frames.
+    const hmrPort = await findFreePort(port + 1);
     const vite = await createServer({
       configFile: path.join(repoRoot, "vite.config.ts"),
-      server: { middlewareMode: true, hmr: { server: app.server } },
+      server: { middlewareMode: true, hmr: { port: hmrPort, host: HOST }, cors: false },
       appType: "spa",
     });
     await app.register(middie);
-    app.use(vite.middlewares);
+    // Vite's SPA fallback answers every path with index.html, including the /ws upgrade and API
+    // calls, so it only sees requests for the page and its assets.
+    app.use((request, response, next) => {
+      const url = request.url ?? "";
+      if (url.startsWith("/ws") || url.startsWith("/api/")) {
+        next();
+        return;
+      }
+      vite.middlewares(request, response, next);
+    });
   }
 
   await app.listen({ port, host: HOST });

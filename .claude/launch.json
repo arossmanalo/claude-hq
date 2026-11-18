@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["tsx", "src/server/main.ts", "--no-open"],
       "port": 4317
+    },
+    {
+      "name": "office-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "src/server/main.ts", "--dev", "--no-open"],
+      "port": 4317
     }
   ]
 }
