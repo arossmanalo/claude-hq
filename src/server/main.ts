@@ -1,18 +1,45 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Fastify from "fastify";
-import fastifyStatic from "@fastify/static";
-import { findFreePort, HOST } from "./port";
+import { builtClientDir, createApp } from "./app";
+import { LogStore } from "./logs/logStore";
 import { openBrowser } from "./openBrowser";
+import { liveSessionsDir, projectsDir } from "./paths";
+import { findFreePort, HOST } from "./port";
+import type { HubHandlers } from "./clientHub";
 
 const DEFAULT_PORT = 4317;
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const isDev = process.argv.includes("--dev");
 
-async function main(): Promise<void> {
-  const app = Fastify({ logger: { level: process.env.OFFICE_LOG_LEVEL ?? "warn" } });
+function hubHandlers(store: LogStore): HubHandlers {
+  return {
+    onConnect: async (send) => {
+      send({ type: "projects", projects: store.projects() });
+    },
+    onSubscribe: async (sessionIds, send) => {
+      for (const sessionId of sessionIds) {
+        const detail = await store.detail(sessionId);
+        if (detail) send({ type: "session", detail });
+      }
+    },
+    onCommand: async () => {
+      throw new Error("Chatting with the router isn't available in this build yet.");
+    },
+  };
+}
 
-  app.get("/api/health", async () => ({ ok: true }));
+async function main(): Promise<void> {
+  const port = await findFreePort(Number(process.env.OFFICE_PORT ?? DEFAULT_PORT));
+  const store = new LogStore({ projectsDir: projectsDir(), liveDir: liveSessionsDir() });
+  await store.start();
+
+  const { app } = await createApp({
+    port,
+    store,
+    hubHandlers,
+    clientDir: isDev ? undefined : builtClientDir(repoRoot),
+    logLevel: process.env.OFFICE_LOG_LEVEL,
+  });
 
   if (isDev) {
     const { createServer } = await import("vite");
@@ -24,26 +51,15 @@ async function main(): Promise<void> {
     });
     await app.register(middie);
     app.use(vite.middlewares);
-  } else {
-    const clientDir = path.join(repoRoot, "dist", "client");
-    await app.register(fastifyStatic, { root: clientDir });
-    app.setNotFoundHandler((request, reply) => {
-      if (request.url.startsWith("/api/")) {
-        return reply.code(404).send({ error: "Not found" });
-      }
-      return reply.sendFile("index.html");
-    });
   }
 
-  const preferred = Number(process.env.OFFICE_PORT ?? DEFAULT_PORT);
-  const port = await findFreePort(preferred);
   await app.listen({ port, host: HOST });
-
   const url = `http://${HOST}:${port}`;
   console.log(`Claude Office is running at ${url}`);
-  if (process.env.OFFICE_NO_OPEN !== "1") openBrowser(url);
+  if (process.env.OFFICE_NO_OPEN !== "1" && !process.argv.includes("--no-open")) openBrowser(url);
 
   const shutdown = async (): Promise<void> => {
+    await store.stop();
     await app.close();
     process.exit(0);
   };

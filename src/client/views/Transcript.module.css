@@ -1,0 +1,66 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 240px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.message {
+  padding: var(--space-2) 0;
+}
+
+.message + .message {
+  border-top: 1px solid var(--n-800);
+}
+
+.author {
+  display: block;
+  font-family: var(--font-sign);
+  font-size: var(--text-sm);
+  color: var(--n-300);
+}
+
+.message[data-author="router"] .author {
+  color: var(--accent);
+}
+
+.text {
+  margin: var(--space-1) 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 70ch;
+}
+
+.earlier {
+  padding-bottom: var(--space-2);
+}
+
+.earlier button {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--n-300);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.earlier button:disabled {
+  cursor: progress;
+  text-decoration: none;
+}
+
+.error {
+  margin: 0;
+  color: var(--state-error);
+  font-size: var(--text-sm);
+}

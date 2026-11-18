@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "office",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "src/server/main.ts", "--no-open"],
+      "port": 4317
+    }
+  ]
+}
