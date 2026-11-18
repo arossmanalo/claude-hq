@@ -102,8 +102,8 @@ describe("SessionIndex", () => {
 
 describe("readLiveSessions", () => {
   it("keeps sessions whose process is running and skips stale or broken files", async () => {
-    const live = await readLiveSessions(path.join(fixtures, "sessions"), (pid) => pid === 4242);
+    const live = await readLiveSessions(path.join(fixtures, "sessions"), (pid) => pid === 99999999);
     expect([...live.keys()]).toEqual([SESSION_ID]);
-    expect(live.get(SESSION_ID)).toMatchObject({ pid: 4242, status: "busy" });
+    expect(live.get(SESSION_ID)).toMatchObject({ pid: 99999999, status: "busy" });
   });
 });
