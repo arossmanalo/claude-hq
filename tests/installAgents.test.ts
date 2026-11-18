@@ -39,6 +39,22 @@ describe("installAgents", () => {
     expect(forced.find((result) => result.file === "coder.md")?.outcome).toBe("replaced");
   });
 
+  it("updates a copy it installed earlier that the user never touched", async () => {
+    await installAgents(source, target, false);
+    // Simulate an older office version: the manifest matches this text, so it's ours to replace.
+    const older = "---\nname: coder\nmodel: sonnet\n---\nOld instructions";
+    await writeFile(path.join(target, "coder.md"), older);
+    const manifestPath = path.join(target, ".claude-office-agents.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    const { createHash } = await import("node:crypto");
+    manifest["coder.md"] = createHash("sha256").update(older).digest("hex");
+    await writeFile(manifestPath, JSON.stringify(manifest));
+
+    const results = await installAgents(source, target, false);
+    expect(results.find((result) => result.file === "coder.md")?.outcome).toBe("updated");
+    expect(await readFile(path.join(target, "coder.md"), "utf8")).not.toBe(older);
+  });
+
   it("reports unchanged files on a second run", async () => {
     await installAgents(source, target, false);
     const again = await installAgents(source, target, false);

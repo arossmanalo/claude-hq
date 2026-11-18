@@ -10,6 +10,7 @@ const target = path.join(claudeHome(), "agents");
 const MESSAGES = {
   installed: "installed",
   unchanged: "already up to date",
+  updated: "updated (you had not changed it)",
   "kept-yours": "kept your edited copy (run with --force to replace it)",
   replaced: "replaced your copy",
 } as const;
