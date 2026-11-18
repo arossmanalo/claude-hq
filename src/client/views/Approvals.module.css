@@ -33,6 +33,9 @@
   font-size: var(--text-sm);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  /* Long commands scroll inside the card so Allow and Deny stay in reach. */
+  max-height: 10.5em;
+  overflow-y: auto;
 }
 
 .actions {
