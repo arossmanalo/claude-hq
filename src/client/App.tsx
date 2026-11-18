@@ -5,7 +5,7 @@ import { connection } from "./state/connection";
 import { useOfficeStore } from "./state/officeStore";
 import { useHashRoute } from "./state/useHashRoute";
 import { BuildingView } from "./views/BuildingView";
-import { OfficeView } from "./views/OfficeView";
+import { NewOfficeView, OfficeView } from "./views/OfficeView";
 import styles from "./App.module.css";
 
 export function App() {
@@ -17,11 +17,11 @@ export function App() {
     <div className={styles.app}>
       <TopBar />
       <Notices />
-      {view.kind === "building" ? (
-        <BuildingView />
-      ) : (
+      {view.kind === "building" && <BuildingView />}
+      {view.kind === "office" && (
         <OfficeView projectKey={view.projectKey} pickedSessionId={view.sessionId} />
       )}
+      {view.kind === "new" && <NewOfficeView cwd={view.cwd} />}
     </div>
   );
 }

@@ -5,7 +5,8 @@ import layout from "./Layout.module.css";
 import styles from "./SessionHeader.module.css";
 
 interface SessionHeaderProps {
-  project: ProjectSummary;
+  cwd: string;
+  project: ProjectSummary | null;
   detail: SessionDetail | null;
   /** True when viewing a session picked from the filing cabinet. */
   picked: boolean;
@@ -17,13 +18,13 @@ function modeText(detail: SessionDetail): string {
   return `Archived, last active ${relativeTime(detail.updatedAt)}`;
 }
 
-export function SessionHeader({ project, detail, picked }: SessionHeaderProps) {
+export function SessionHeader({ cwd, project, detail, picked }: SessionHeaderProps) {
   return (
     <section className={layout.section}>
-      <p className={styles.folder} title={project.cwd}>
-        {project.cwd}
+      <p className={styles.folder} title={cwd}>
+        {cwd}
       </p>
-      <h1 className={styles.title}>{detail?.title ?? "New session"}</h1>
+      <h1 className={styles.title}>{detail?.title ?? (project ? "Untitled session" : "New office")}</h1>
       {detail ? (
         <p className={styles.meta}>
           <span data-live={detail.live}>{modeText(detail)}</span>
@@ -33,9 +34,11 @@ export function SessionHeader({ project, detail, picked }: SessionHeaderProps) {
           )}
         </p>
       ) : (
-        <p className={styles.meta}>Loading this session…</p>
+        <p className={styles.meta}>
+          {project ? "Loading this session…" : "No sessions in this folder yet. Your first message starts one."}
+        </p>
       )}
-      {picked && (
+      {picked && project && (
         <button
           type="button"
           className={styles.link}

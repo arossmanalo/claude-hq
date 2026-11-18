@@ -7,7 +7,9 @@ export type ConnectionState = "connecting" | "open" | "closed";
 export type View =
   | { kind: "building" }
   /** `sessionId` is set when the user picked an older session from the filing cabinet. */
-  | { kind: "office"; projectKey: string; sessionId: string | null };
+  | { kind: "office"; projectKey: string; sessionId: string | null }
+  /** An office for a folder that has no Claude Code sessions yet. */
+  | { kind: "new"; cwd: string };
 
 export interface Notice {
   id: number;

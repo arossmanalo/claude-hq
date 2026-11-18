@@ -47,9 +47,11 @@ export function RoomList({ rooms, selectedRole, onSelect, onOpenArchive, archive
           );
         })}
       </ul>
-      <button type="button" className={styles.archive} onClick={onOpenArchive}>
-        Open filing cabinet ({archiveCount === 1 ? "1 session" : `${archiveCount} sessions`})
-      </button>
+      {archiveCount > 0 && (
+        <button type="button" className={styles.archive} onClick={onOpenArchive}>
+          Open filing cabinet ({archiveCount === 1 ? "1 session" : `${archiveCount} sessions`})
+        </button>
+      )}
     </section>
   );
 }

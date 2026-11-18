@@ -4,6 +4,7 @@ import { BuildingScene, type BuildingData } from "../scene/BuildingScene";
 import { routerFor, sameFolder, useOfficeStore } from "../state/officeStore";
 import { navigate } from "../state/useHashRoute";
 import { Directory } from "./Directory";
+import { NewOfficeForm } from "./NewOfficeForm";
 import layout from "./Layout.module.css";
 
 export function BuildingView() {
@@ -41,6 +42,7 @@ export function BuildingView() {
         />
       </section>
       <aside className={layout.panel}>
+        <NewOfficeForm />
         <Directory data={data} />
       </aside>
     </main>

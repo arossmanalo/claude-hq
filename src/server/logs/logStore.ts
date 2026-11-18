@@ -28,6 +28,11 @@ export interface LogStoreOptions {
   ownedSessionIds?: () => ReadonlySet<string>;
   /** Agent ids with an open permission request, per session. */
   waitingAgentIds?: (sessionId: string) => ReadonlySet<string>;
+  /**
+   * "busy" or "idle" for sessions the office runs. The office knows its own router's state
+   * sooner than Claude Code's registry does.
+   */
+  ownedLiveStatus?: (sessionId: string) => string | null;
 }
 
 interface Tracker {
@@ -157,6 +162,11 @@ export class LogStore extends EventEmitter<StoreEvents> {
     return this.options.ownedSessionIds?.() ?? new Set();
   }
 
+  /** Live and ownership facts for one session, or null if the office has never seen it. */
+  sessionSummary(sessionId: string): SessionSummary | null {
+    return this.summaryFor(sessionId);
+  }
+
   private summaryFor(sessionId: string): SessionSummary | null {
     const info = this.files.get(sessionId);
     const live = this.live.get(sessionId);
@@ -170,7 +180,7 @@ export class LogStore extends EventEmitter<StoreEvents> {
       startedAt: info?.startedAt ?? null,
       updatedAt: info?.updatedAt ?? null,
       live: live !== undefined || owned,
-      liveStatus: live?.status ?? null,
+      liveStatus: (owned ? this.options.ownedLiveStatus?.(sessionId) : null) ?? live?.status ?? null,
       ownedByOffice: owned,
       sizeBytes: info?.sizeBytes ?? 0,
     };

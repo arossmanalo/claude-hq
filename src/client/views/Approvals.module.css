@@ -1,0 +1,68 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 45vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--n-700);
+  background: var(--n-900);
+}
+
+.card {
+  padding: var(--space-3);
+  border-left: 3px solid var(--accent);
+  background: var(--n-850);
+}
+
+.who {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--n-300);
+}
+
+.who strong {
+  color: var(--n-100);
+}
+
+.what {
+  display: block;
+  padding: var(--space-2);
+  background: var(--n-950);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.allow,
+.deny {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.allow {
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.deny {
+  border: 1px solid var(--n-700);
+  background: none;
+}
+
+.allow:disabled,
+.deny:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}

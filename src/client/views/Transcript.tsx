@@ -14,7 +14,14 @@ interface EarlierState {
 }
 
 /** The router conversation, newest at the bottom, with older pages loaded on request. */
-export function Transcript({ detail }: { detail: SessionDetail | null }) {
+export function Transcript({
+  detail,
+  emptyBecauseNew,
+}: {
+  detail: SessionDetail | null;
+  /** The folder has no sessions yet, so there's nothing to load. */
+  emptyBecauseNew: boolean;
+}) {
   const sessionId = detail?.sessionId ?? null;
   const [earlier, setEarlier] = useState<EarlierState>({
     sessionId,
@@ -77,7 +84,9 @@ export function Transcript({ detail }: { detail: SessionDetail | null }) {
     <section className={`${layout.section} ${styles.section}`}>
       <h2 className={layout.sectionTitle}>Conversation</h2>
       {!detail ? (
-        <p className={layout.lead}>Loading…</p>
+        <p className={layout.lead}>
+          {emptyBecauseNew ? "Nothing here yet. What you send the router appears here." : "Loading…"}
+        </p>
       ) : messages.length === 0 ? (
         <p className={layout.lead}>No messages yet. What you send the router appears here.</p>
       ) : (

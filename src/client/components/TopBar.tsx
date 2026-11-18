@@ -13,8 +13,12 @@ export function TopBar() {
   const connectionState = useOfficeStore((state) => state.connection);
   const projects = useOfficeStore((state) => state.projects);
   const permissions = useOfficeStore((state) => state.permissions);
-  const project =
-    view.kind === "office" ? projects.find((candidate) => candidate.key === view.projectKey) : null;
+  const place =
+    view.kind === "office"
+      ? (projects.find((candidate) => candidate.key === view.projectKey)?.name ?? "Office")
+      : view.kind === "new"
+        ? (view.cwd.split(/[\\/]/).filter(Boolean).at(-1) ?? "New office")
+        : null;
 
   return (
     <header className={styles.bar}>
@@ -27,13 +31,13 @@ export function TopBar() {
         >
           Claude Office
         </button>
-        {view.kind === "office" && (
+        {place && (
           <>
             <span className={styles.separator} aria-hidden="true">
               /
             </span>
             <span className={styles.current} aria-current="page">
-              {project?.name ?? "Office"}
+              {place}
             </span>
           </>
         )}

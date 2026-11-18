@@ -19,6 +19,14 @@
   background: var(--n-950);
 }
 
+/* Approvals and the composer stay on screen while the rest of the panel scrolls. */
+.dock {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  z-index: 1;
+}
+
 .section {
   padding: var(--space-4);
   border-bottom: 1px solid var(--n-800);

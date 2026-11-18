@@ -70,7 +70,16 @@ export async function createApp(options: AppOptions): Promise<{
     });
   }
 
-  store.on("projects", () => hub.broadcast({ type: "projects", projects: store.projects() }));
+  store.on("projects", () => {
+    hub.broadcast({ type: "projects", projects: store.projects() });
+    // A page may have subscribed to a session before its log file existed (a router that just
+    // started). Now that the store may know it, send what it has.
+    for (const sessionId of hub.subscribedSessionIds()) {
+      void store.detail(sessionId).then((detail) => {
+        if (detail) hub.sendToSubscribers(sessionId, { type: "session", detail });
+      });
+    }
+  });
   store.on("session", (sessionId) => {
     if (!hub.subscribedSessionIds().has(sessionId)) return;
     void store.detail(sessionId).then((detail) => {

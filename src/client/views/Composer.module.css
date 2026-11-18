@@ -1,0 +1,145 @@
+.section {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: 1px solid var(--n-700);
+  background: var(--n-950);
+}
+
+.status,
+.attention,
+.error {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.status {
+  color: var(--n-300);
+}
+
+.attention {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.error {
+  color: var(--state-error);
+}
+
+.attentionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.attentionRow .attention {
+  margin: 0;
+}
+
+.queue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--n-300);
+}
+
+.queue p {
+  margin: 0;
+}
+
+.blocked p {
+  margin: 0 0 var(--space-2);
+  color: var(--n-300);
+  font-size: var(--text-sm);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.input {
+  width: 100%;
+  min-height: 72px;
+  max-height: 40vh;
+  resize: vertical;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--n-700);
+  border-radius: var(--radius-sm);
+  background: var(--n-900);
+  line-height: 1.5;
+}
+
+.input::placeholder {
+  color: var(--n-500);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.model {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--n-300);
+  margin-right: auto;
+}
+
+.model select {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--n-700);
+  border-radius: var(--radius-sm);
+  background: var(--n-900);
+}
+
+.primary,
+.secondary {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.primary:disabled {
+  background: var(--n-700);
+  color: var(--n-300);
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 1px solid var(--n-700);
+  background: none;
+}
+
+.secondary:hover {
+  border-color: var(--n-500);
+}
+
+.textButton {
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  border: 0;
+  background: none;
+  color: var(--n-300);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
